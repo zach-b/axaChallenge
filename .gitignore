@@ -5,3 +5,9 @@ field_description.xlsx
 *.zip
 meteo.7z
 *.csv
+.idea/.name
+*.iml
+*.xml
+.spyderproject
+*.pyc
+*.xlsx
