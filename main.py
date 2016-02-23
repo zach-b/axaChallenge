@@ -9,4 +9,4 @@ print train_data.head()
 #%%
 #Data Pre processing
 
-preprocessed_train_data = preprocess(train_data)
+preprocess(train_data)
