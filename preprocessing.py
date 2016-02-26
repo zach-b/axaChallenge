@@ -41,4 +41,10 @@ def preprocess(train_data) :
     train_data.drop('ASS_BEGIN', axis=1,inplace=True)
     train_data.drop('ASS_COMENT', axis=1,inplace=True)
     train_data.drop('ASS_END', axis=1,inplace=True)
-    return 0
+    
+    
+    train_labels = train_data['CSPL_RECEIVED_CALLS']
+    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True)
+    
+    
+    return train_data, train_labels

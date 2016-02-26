@@ -10,4 +10,4 @@ print train_data.head()
 #%%
 #Data Pre processing
 
-preprocess(train_data)
+train_data, train_labels = preprocess(train_data)
