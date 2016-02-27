@@ -6,12 +6,11 @@ Created on Tue Feb 23 14:28:26 2016
 """
 
 import pandas as pd
+import numpy as np
 
 def preprocess(train_data) :
+    droplist =[]
     
-#    Pas de jours feriés ?
-    train_data.drop('DAY_OFF', axis=1,inplace=True)
-    train_data.drop('DAY_DS', axis=1,inplace=True)
     
 
     train_data['LUNDI']=(train_data['DAY_WE_DS']=='Lundi')*1
@@ -27,24 +26,43 @@ def preprocess(train_data) :
     train_data['NUIT']= (train_data['TPER_TEAM']=='Nuit')*1
     train_data.drop('TPER_TEAM', axis=1,inplace=True)
     
-#    ACD_COD = 1 tout le temps
-    train_data.drop('ACD_COD', axis=1,inplace=True)
-#    ACD_LIB = 'Entity1 G3RV6' tout le temps
-    train_data.drop('ACD_LIB', axis=1,inplace=True)
+#    pas de jours feriés ?
+    droplist.extend(['DAY_OFF','DAY_DS'])
+    droplist.extend(['ACD_COD','ACD_LIB'])
+    droplist.extend(['ASS_DIRECTORSHIP','ASS_PARTNER','ASS_POLE','ASS_SOC_MERE'])
+    droplist.extend(['ASS_BEGIN','ASS_COMENT','ASS_END'])
     
-    train_data.drop('ASS_DIRECTORSHIP', axis=1,inplace=True)
-    train_data.drop('ASS_PARTNER', axis=1,inplace=True)
-    train_data.drop('ASS_POLE', axis=1,inplace=True)
-    train_data.drop('ASS_SOC_MERE', axis=1,inplace=True)
+    time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
+    train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + time
     
-#    A quoi servent ces features ?
-    train_data.drop('ASS_BEGIN', axis=1,inplace=True)
-    train_data.drop('ASS_COMENT', axis=1,inplace=True)
-    train_data.drop('ASS_END', axis=1,inplace=True)
+    droplist.extend(['SPLIT_COD','CSPL_CALLSOFFERED','CSPL_OUTFLOWCALLS','CSPL_INFLOWCALLS','CSPL_NOANSREDIR','CSPL_ACDCALLS',
+    'CSPL_ABNCALLS','CSPL_CONFERENCE','CSPL_TRANSFERED','CSPL_RINGCALLS','CSPL_DISCCALLS','CSPL_HOLDCALLS',
+    'CSPL_ACDAUXOUTCALLS','CSPL_HOLDABNCALLS','CSPL_MAXINQUEUE','CSPL_DEQUECALLS','CSPL_ACWINCALLS',
+    'CSPL_AUXINCALLS','CSPL_ACWOUTCALLS','CSPL_ACWOUTOFFCALLS','CSPL_ACWOUTADJCALLS','CSPL_AUXOUTCALLS',
+    'CSPL_AUXOUTOFFCALLS','CSPL_AUXOUTADJCALLS','CSPL_INTRVL','CSPL_OUTFLOWTIME','CSPL_DEQUETIME','CSPL_I_ACDTIME',
+    'CSPL_DISCTIME','CSPL_HOLDTIME','CSPL_ABNTIME','CSPL_I_STAFFTIME','CSPL_ANSTIME','CSPL_I_RINGTIME',
+    'CSPL_RINGTIME','CSPL_ACDTIME','CSPL_I_AVAILTIME','CSPL_ACWTIME','CSPL_I_ACWTIME','CSPL_I_OTHERTIME',
+    'CSPL_ACWINTIME','CSPL_I_ACWINTIME','CSPL_AUXINTIME','CSPL_I_AUXINTIME','CSPL_ACWOUTIME','CSPL_I_ACWOUTTIME',
+    'CSPL_ACWOUTOFFTIME','CSPL_AUXOUTTIME','CSPL_I_AUXOUTTIME','CSPL_AUXOUTOFFTIME','CSPL_SERVICELEVEL',
+    'CSPL_ACCEPTABLE','CSPL_SLVLOUTFLOWS','CSPL_SLVLABNS','CSPL_ABNCALLS1','CSPL_ABNCALLS2','CSPL_ABNCALLS3',
+    'CSPL_ABNCALLS4','CSPL_ABNCALLS5','CSPL_ABNCALLS6','CSPL_ABNCALLS7','CSPL_ABNCALLS8','CSPL_ABNCALLS9',
+    'CSPL_ABNCALLS10','CSPL_MAXSTAFFED','CSPL_INCOMPLETE','CSPL_ABANDONNED_CALLS','CSPL_CALLS','DATE'])
+    train_data.drop(droplist, axis=1,inplace=True)
+    
+    if 'Unnamed: 0' in train_data.columns.values:
+        train_data.drop('Unnamed: 0', axis=1,inplace=True)
+    
+    #%%
+    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
     
     
-    train_labels = train_data['CSPL_RECEIVED_CALLS']
-    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True)
+    
+    #%%
+    
+    
+    train_labels = train_data['CSPL_RECEIVED_CALLS'].values
+#    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True).values
+#    train_data = train_data.values
     
     
     return train_data, train_labels
