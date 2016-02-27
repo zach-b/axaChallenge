@@ -54,7 +54,15 @@ def preprocess(train_data) :
     
     #%%
     ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
-    
+    non_traite = ['A DEFINIR', 'AEVA', 'DOMISERVE', 'Divers','Evenements', 'FO Remboursement', 'Finances PCX',
+       'IPA Belgique - E/A MAJ','Juridique', 'KPT', 'LifeStyle','Maroc - Génériques', 'Maroc - Renault',
+       'Medicine', 'NL Médical', 'NL Technique','Réception', 'TAI - CARTES', 'TAI - PANNE MECANIQUE',
+       'TAI - PNEUMATIQUES', 'TAI - RISQUE', 'TAI - RISQUE SERVICES','TAI - SERVICE', 'TPA',
+       'Technical', 'Technique Belgique', 'Technique International','Truck Assistance']
+    data = {}
+    for ass in ass_list :
+        if ass not in non_traite :
+            data[ass] = train_data.loc[train_data['ASS_ASSIGNMENT']==ass]
     
     
     #%%
@@ -65,4 +73,4 @@ def preprocess(train_data) :
 #    train_data = train_data.values
     
     
-    return train_data, train_labels
+    return data, train_labels
