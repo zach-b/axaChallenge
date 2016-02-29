@@ -46,7 +46,7 @@ def preprocess(train_data) :
     'CSPL_ACWOUTOFFTIME','CSPL_AUXOUTTIME','CSPL_I_AUXOUTTIME','CSPL_AUXOUTOFFTIME','CSPL_SERVICELEVEL',
     'CSPL_ACCEPTABLE','CSPL_SLVLOUTFLOWS','CSPL_SLVLABNS','CSPL_ABNCALLS1','CSPL_ABNCALLS2','CSPL_ABNCALLS3',
     'CSPL_ABNCALLS4','CSPL_ABNCALLS5','CSPL_ABNCALLS6','CSPL_ABNCALLS7','CSPL_ABNCALLS8','CSPL_ABNCALLS9',
-    'CSPL_ABNCALLS10','CSPL_MAXSTAFFED','CSPL_INCOMPLETE','CSPL_ABANDONNED_CALLS','CSPL_CALLS','DATE'])
+    'CSPL_ABNCALLS10','CSPL_MAXSTAFFED','CSPL_INCOMPLETE','CSPL_ABANDONNED_CALLS','CSPL_CALLS'])
     train_data.drop(droplist, axis=1,inplace=True)
     
     if 'Unnamed: 0' in train_data.columns.values:
@@ -60,17 +60,17 @@ def preprocess(train_data) :
        'TAI - PNEUMATIQUES', 'TAI - RISQUE', 'TAI - RISQUE SERVICES','TAI - SERVICE', 'TPA',
        'Technical', 'Technique Belgique', 'Technique International','Truck Assistance']
     data = {}
+    labels = {}
     for ass in ass_list :
         if ass not in non_traite :
             data[ass] = train_data.loc[train_data['ASS_ASSIGNMENT']==ass]
+            labels[ass] = train_data['CSPL_RECEIVED_CALLS'].loc[train_data['ASS_ASSIGNMENT']==ass]
     
     
     #%%
     
     
-    train_labels = train_data['CSPL_RECEIVED_CALLS'].values
-#    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True).values
-#    train_data = train_data.values
+#    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True)
     
     
-    return data, train_labels
+    return data, labels
