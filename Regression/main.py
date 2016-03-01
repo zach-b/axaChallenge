@@ -8,7 +8,9 @@ sys.setdefaultencoding("utf-8")
 
 #Load Data
 #train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';')
-train_data = pd.read_csv('train_data_short.csv',header=0, sep=';')
+#train_data = pd.read_csv('train_data_short.csv',header=0, sep=';')
+meteo2011 = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
+meteo2012 = pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 print train_data.head()
 
 #%%
