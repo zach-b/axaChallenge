@@ -56,6 +56,14 @@ def preprocess(train_data) :
     if 'Unnamed: 0' in train_data.columns.values:
         train_data.drop('Unnamed: 0', axis=1,inplace=True)
         
+        #%%
+#   traitement de météo
+    meteo = meteo[meteo['city']=='Paris-Montsouris']
+    meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
+    for column in meteo:
+        meteo[column].fillna(np.mean(meteo[column]))
+        
+        
         
         #%%
 #   Enlever les ass_assignment non traités     

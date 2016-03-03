@@ -16,6 +16,8 @@ sys.setdefaultencoding("utf-8")
 train_data = pd.read_csv('train_data_short.csv',header=0, sep=';')
 #meteo2011 = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 #meteo2012 = pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
+meteo = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa']).append(
+pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa']))
 print train_data.head()
 
 #%%
@@ -23,7 +25,7 @@ print train_data.head()
 # Data Pre processing
 #==============================================================================
 
-data, labels = preprocess(train_data)
+data, labels = preprocess(train_data, meteo)
 num_features = len(train_data.columns.values)
 
 
