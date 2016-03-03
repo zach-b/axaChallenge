@@ -4,9 +4,13 @@ Created on Tue Feb 23 14:28:26 2016
 
 @author: user
 """
+#==============================================================================
+# Algo avec régression
+#==============================================================================
 
 import pandas as pd
 import numpy as np
+import time
 
 def preprocess(train_data) :
     droplist =[]
@@ -32,8 +36,8 @@ def preprocess(train_data) :
     droplist.extend(['ASS_DIRECTORSHIP','ASS_PARTNER','ASS_POLE','ASS_SOC_MERE'])
     droplist.extend(['ASS_BEGIN','ASS_COMENT','ASS_END'])
     
-    time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
-    train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + time
+    data_time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
+    train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + data_time
     
     droplist.extend(['SPLIT_COD','CSPL_CALLSOFFERED','CSPL_OUTFLOWCALLS','CSPL_INFLOWCALLS','CSPL_NOANSREDIR','CSPL_ACDCALLS',
     'CSPL_ABNCALLS','CSPL_CONFERENCE','CSPL_TRANSFERED','CSPL_RINGCALLS','CSPL_DISCCALLS','CSPL_HOLDCALLS',
@@ -52,28 +56,50 @@ def preprocess(train_data) :
     if 'Unnamed: 0' in train_data.columns.values:
         train_data.drop('Unnamed: 0', axis=1,inplace=True)
         
-    #%%
-#   Rassembler les différentes lignes qui correspondent exactement à la même date et au même ass_assignment
-    date_list = np.unique(train_data['DATE'].values)
-    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
-    
-    
-    
-    
-    #%%
-#    partitionner les données selon leur ass_assignment
-#    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
+        
+        #%%
+#   Enlever les ass_assignment non traités     
+        
     non_traite = ['A DEFINIR', 'AEVA', 'DOMISERVE', 'Divers','Evenements', 'FO Remboursement', 'Finances PCX',
        'IPA Belgique - E/A MAJ','Juridique', 'KPT', 'LifeStyle','Maroc - Génériques', 'Maroc - Renault',
        'Medicine', 'NL Médical', 'NL Technique','Réception', 'TAI - CARTES', 'TAI - PANNE MECANIQUE',
        'TAI - PNEUMATIQUES', 'TAI - RISQUE', 'TAI - RISQUE SERVICES','TAI - SERVICE', 'TPA',
        'Technical', 'Technique Belgique', 'Technique International','Truck Assistance']
+    for ass in non_traite:
+        train_data = train_data[train_data['ASS_ASSIGNMENT']!=ass]
+        
+        
+    #%%
+#   Rassembler les différentes lignes qui correspondent exactement à la même date et au même ass_assignment
+#    
+#    start_time = time.time()    
+#    
+#    date_list = np.unique(train_data['DATE'].values)
+#    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
+#    
+#    for date in date_list:
+#        for ass in ass_list:
+#            print date +" "+ass
+#            temp = (train_data['DATE']==date) & (train_data['ASS_ASSIGNMENT']==ass)
+#            if not train_data[temp].empty:
+#                first_index = train_data[temp].index.values[0]
+#                train_data['CSPL_RECEIVED_CALLS'][first_index] = train_data['CSPL_RECEIVED_CALLS'][temp].sum()
+#                
+#                temp[first_index] = False
+#                train_data = train_data[~temp]
+#    
+#    
+#    elapsed_time = time.time() - start_time
+#    print elapsed_time
+#    
+    #%%
+#    partitionner les données selon leur ass_assignment
+    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
     data = {}
     labels = {}
     for ass in ass_list :
-        if ass not in non_traite :
-            data[ass] = train_data.loc[train_data['ASS_ASSIGNMENT']==ass]
-            labels[ass] = train_data['CSPL_RECEIVED_CALLS'].loc[train_data['ASS_ASSIGNMENT']==ass]
+        data[ass] = train_data.loc[train_data['ASS_ASSIGNMENT']==ass]
+        labels[ass] = train_data['CSPL_RECEIVED_CALLS'].loc[train_data['ASS_ASSIGNMENT']==ass]
     
     
     #%%
