@@ -1,3 +1,7 @@
 - (Done) Rajouter les lignes des demi-heures à meteo
 - Choisir un algo d'apprentissage (dans sklearn)
+	- RandomForestRegressor
+	- GradientBoostingRegressor
+	- LogisticRegression
+	- GaussianNB
 - Intégrer meteo dans l'algorithme
