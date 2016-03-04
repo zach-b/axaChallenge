@@ -25,7 +25,7 @@ print train_data.head()
 # Data Pre processing
 #==============================================================================
 
-data, labels = preprocess(train_data, meteo)
+data, labels, meteo = preprocess(train_data, meteo)
 num_features = len(train_data.columns.values)
 
 

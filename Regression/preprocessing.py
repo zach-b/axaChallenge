@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 import time
 
-def preprocess(train_data) :
+def preprocess(train_data,meteo) :
     droplist =[]
     
     
@@ -37,6 +37,7 @@ def preprocess(train_data) :
     droplist.extend(['ASS_BEGIN','ASS_COMENT','ASS_END'])
     
     data_time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
+    
     train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + data_time
     
     droplist.extend(['SPLIT_COD','CSPL_CALLSOFFERED','CSPL_OUTFLOWCALLS','CSPL_INFLOWCALLS','CSPL_NOANSREDIR','CSPL_ACDCALLS',
@@ -58,9 +59,14 @@ def preprocess(train_data) :
         
         #%%
 #   traitement de météo
+        
+    def formatDate(date) :
+        return date+":00.000"
+        
     meteo = meteo[meteo['city']=='Paris-Montsouris']
     meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
-    for column in meteo:
+    meteo['date'] = meteo['date'].map(formatDate)
+    for column in ['temp_min','temp_max','precip','pressure_hPa']:
         meteo[column].fillna(np.mean(meteo[column]))
         
         
@@ -99,15 +105,25 @@ def preprocess(train_data) :
 #    
 #    elapsed_time = time.time() - start_time
 #    print elapsed_time
-#    
+
+    groups = train_data.groupby(['DATE','WEEK_END','TPER_HOUR','ASS_ASSIGNMENT','LUNDI',
+    'MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE','JOUR','NUIT']).sum().reset_index()
+        
+
+#%%        
+
+    
+        
+        
+        
     #%%
 #    partitionner les données selon leur ass_assignment
     ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
     data = {}
     labels = {}
     for ass in ass_list :
-        data[ass] = train_data.loc[train_data['ASS_ASSIGNMENT']==ass]
-        labels[ass] = train_data['CSPL_RECEIVED_CALLS'].loc[train_data['ASS_ASSIGNMENT']==ass]
+        data[ass] = groups.loc[groups['ASS_ASSIGNMENT']==ass]
+        labels[ass] = groups['CSPL_RECEIVED_CALLS'].loc[groups['ASS_ASSIGNMENT']==ass]
     
     
     #%%
@@ -116,4 +132,4 @@ def preprocess(train_data) :
 #    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True)
     
     
-    return data, labels
+    return data, labels, meteo
