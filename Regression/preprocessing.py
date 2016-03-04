@@ -106,6 +106,7 @@ def preprocess(train_data,meteo) :
     for ass in ass_list :
         data[ass] = groups.loc[groups['ASS_ASSIGNMENT']==ass]
         labels[ass] = groups['CSPL_RECEIVED_CALLS'].loc[groups['ASS_ASSIGNMENT']==ass]
+        data[ass].drop('ASS_ASSIGNMENT', axis=1, inplace = True)
     
     
 #%%
