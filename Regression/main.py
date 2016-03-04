@@ -11,6 +11,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.grid_search import RandomizedSearchCV
+from sklearn.grid_search import GridSearchCV
 
 os.chdir('..')
 #==============================================================================
@@ -24,15 +26,14 @@ sys.setdefaultencoding("utf-8")
 submission = pd.read_csv('submission.txt',sep='\t',parse_dates=[0])
 
 #Load Data
-#train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';',parse_dates=[0])
-train_data = pd.read_csv('train_data_short.csv',header=0, sep=';',parse_dates=[1])
+train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';',parse_dates=[0])
+#train_data = pd.read_csv('train_data_short.csv',header=0, sep=';',parse_dates=[1])
 #meteo2011 = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 #meteo2012 = pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 #meteo = pd.read_csv('meteo_2011.csv', sep=',',names=['DATE', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]).append(
 #pd.read_csv('meteo_2012.csv', sep=',',names=['DATE', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'],parse_dates=[0]))
 #meteo = pd.concat([pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]),(pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]))], ignore_index=True)
 
-print train_data.head()
 
 #%%
 #==============================================================================
@@ -47,22 +48,29 @@ num_features = len(train_data.columns.values)
 #==============================================================================
 # Learning Algorithm
 #==============================================================================
-
+print "Training ..."
 Regressors = {}
 
 start_time = time.time()
 
 for ass in data:
-    data_train, data_test, labels_train, labels_test = cross_validation.train_test_split(data[ass].values, labels[ass])
+    print ass
+#    data_train, data_test, labels_train, labels_test = cross_validation.train_test_split(data[ass].values, labels[ass])
     #Regressors[ass] = GaussianNB()
 #    Regressors[ass] = LogisticRegression()    
 #    Regressors[ass] = RandomForestRegressor()
-    Regressors[ass] = GradientBoostingRegressor()
+    rgs = GradientBoostingRegressor()
+    GBRdict = {"n_estimators":[100,200,300],
+               "max_depth":[3,5]}
 
     # essayer de voir l'influence des paramètres
     # tester plusieurs valeurs
+
+    Regressors[ass] = GridSearchCV(rgs,param_grid=GBRdict,cv=5)
+    Regressors[ass].fit(data[ass].values,labels[ass])    
         
-    Regressors[ass].fit(data_train,labels_train)
+#    Regressors[ass].fit(data_train,labels_train)
+    
 
 elapsed_time = time.time()-start_time
 print elapsed_time
@@ -78,9 +86,9 @@ X = submission.copy()
 processDate(X,'DATE')
 
 for ass in data:
-    submission.prediction[submission['ASS_ASSIGNMENT']==ass]=np.round(Regressors[ass].predict(X[X['ASS_ASSIGNMENT']==ass].drop(['ASS_ASSIGNMENT','prediction'], axis=1)))
+    submission.prediction[submission['ASS_ASSIGNMENT']==ass]=(Regressors[ass].predict(X[X['ASS_ASSIGNMENT']==ass].drop(['ASS_ASSIGNMENT','prediction'], axis=1)))
 
-
+submission.prediction=submission.prediction.clip(lower = 0)
 submission.to_csv('new_results.txt',sep='\t',date_format='%Y-%m-%d %H:%M:%S.000',index=False )
 
 
