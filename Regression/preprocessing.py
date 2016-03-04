@@ -32,8 +32,8 @@ def gettime(date) :
     return(date.hour+date.minute/60.0)
 
 def getnight(date) : 
-    time = gettime(date)
-    return (time >= 23.5 or time <= 7)
+    t = gettime(date)
+    return (t >= 23.5 or t <= 7)
     
 def processDate(data, date_index):
     data['month'] = data[date_index].map(getmonth)
@@ -90,25 +90,24 @@ def preprocess(train_data,meteo) :
 #%%
 #   traitement de météo
     
-#    def addSemiHours(date) :
-#        return date.split(':')[0]+":30"
-#    
+    def addSemiHours(date) :
+        return date + datetime.timedelta(minutes=30)
+    
 #    def formatDate(date) :
 #        return date+":00.000"
-#        
-#    meteo = meteo[meteo['city']=='Paris-Montsouris']
-#    meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
-#    
-#    meteo_temp = meteo.copy(deep=True)
-##    meteo_temp['date'] = meteo['date'].map(addSemiHours)
-#    
-#    meteo = meteo.append(meteo_temp)
-#    meteo.sort(['date'], inplace = True)    
-#    del meteo_temp    
-#    
-#    meteo['date'] = meteo['date'].map(formatDate)
-#    for column in ['temp_min','temp_max','precip','pressure_hPa']:
-#        meteo[column].fillna(np.mean(meteo[column]), inplace = True)
+        
+    meteo = meteo[meteo['city']=='Paris-Montsouris']
+    meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
+    
+    meteo_temp = meteo.copy(deep=True)
+    meteo_temp['date'] = meteo['date'].map(addSemiHours)
+    
+    meteo = meteo.append(meteo_temp)
+    meteo.sort(['date'], inplace = True)    
+    del meteo_temp    
+        
+    processDate(meteo,'date')
+    
     
     
 #%%
@@ -130,7 +129,11 @@ def preprocess(train_data,meteo) :
 #%%
 #Concaténer météo et groups
     
+    groups = pd.merge(groups,meteo,on=['month','day','weekday','weekend','time','night'],how='left')
+#%%    
     
+    for column in ['temp_min','temp_max','precip','pressure_hPa']:
+        groups[column].fillna(np.mean(groups[column]), inplace = True)
         
 #%%
 #  partitionner les données selon leur ass_assignment

@@ -32,7 +32,7 @@ train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';',parse_dates=[0]
 #meteo2012 = pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 #meteo = pd.read_csv('meteo_2011.csv', sep=',',names=['DATE', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]).append(
 #pd.read_csv('meteo_2012.csv', sep=',',names=['DATE', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'],parse_dates=[0]))
-#meteo = pd.concat([pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]),(pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]))], ignore_index=True)
+meteo = pd.concat([pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]),(pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]))], ignore_index=True)
 
 
 #%%
@@ -59,14 +59,15 @@ for ass in data:
     #Regressors[ass] = GaussianNB()
 #    Regressors[ass] = LogisticRegression()    
 #    Regressors[ass] = RandomForestRegressor()
-    rgs = GradientBoostingRegressor()
-    GBRdict = {"n_estimators":[100,200,300],
-               "max_depth":[3,5]}
+    Regressors[ass] = GradientBoostingRegressor(n_estimators = 300, max_depth=7)
+#    rgs = GradientBoostingRegressor()
+#    GBRdict = {"n_estimators":[100,200,300],
+#               "max_depth":[3,5]}
 
     # essayer de voir l'influence des paramètres
     # tester plusieurs valeurs
 
-    Regressors[ass] = GridSearchCV(rgs,param_grid=GBRdict,cv=5)
+#    Regressors[ass] = GridSearchCV(rgs,param_grid=GBRdict,cv=5)
     Regressors[ass].fit(data[ass].values,labels[ass])    
         
 #    Regressors[ass].fit(data_train,labels_train)
@@ -84,6 +85,10 @@ print elapsed_time
 X = submission.copy()
 
 processDate(X,'DATE')
+X = pd.merge(X,meteo,on=['month','day','weekday','weekend','time','night'],how='left')
+
+for column in ['temp_min','temp_max','precip','pressure_hPa']:
+    X[column].fillna(np.mean(X[column]), inplace = True)
 
 for ass in data:
     submission.prediction[submission['ASS_ASSIGNMENT']==ass]=(Regressors[ass].predict(X[X['ASS_ASSIGNMENT']==ass].drop(['ASS_ASSIGNMENT','prediction'], axis=1)))
