@@ -41,9 +41,19 @@ num_features = len(train_data.columns.values)
 # Learning Algorithm
 #==============================================================================
 
+Regressors = {}
 
+for ass in data:
+    data_train, data_test, labels_train, labels_test = cross_validation.train_test_split(data[ass].values, labels[ass])
+    #Regressors[ass] = GaussianNB()
+    #Regressors[ass] = LogisticRegression()    
+    Regressors[ass] = RandomForestRegressor()
 
-
+    # essayer de voir l'influence des paramètres
+    # tester plusieurs valeurs
+        
+    #Regressors[ass] = GradientBoostingRegressor()
+    Regressors[ass].fit(data_train,labels_train)
 
 
 #%%
