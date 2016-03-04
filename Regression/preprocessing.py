@@ -78,7 +78,7 @@ def preprocess(train_data,meteo) :
     
     meteo['date'] = meteo['date'].map(formatDate)
     for column in ['temp_min','temp_max','precip','pressure_hPa']:
-        meteo[column].fillna(np.mean(meteo[column]))
+        meteo[column].fillna(np.mean(meteo[column]), inplace = True)
     
     
 #%%
