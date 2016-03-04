@@ -57,7 +57,7 @@ def preprocess(train_data,meteo) :
     if 'Unnamed: 0' in train_data.columns.values:
         train_data.drop('Unnamed: 0', axis=1,inplace=True)
         
-        #%%
+#%%
 #   traitement de météo
         
     def formatDate(date) :
@@ -71,7 +71,7 @@ def preprocess(train_data,meteo) :
         
         
         
-        #%%
+#%%
 #   Enlever les ass_assignment non traités     
         
     non_traite = ['A DEFINIR', 'AEVA', 'DOMISERVE', 'Divers','Evenements', 'FO Remboursement', 'Finances PCX',
@@ -83,41 +83,13 @@ def preprocess(train_data,meteo) :
         train_data = train_data[train_data['ASS_ASSIGNMENT']!=ass]
         
         
-    #%%
-#   Rassembler les différentes lignes qui correspondent exactement à la même date et au même ass_assignment
-#    
-#    start_time = time.time()    
-#    
-#    date_list = np.unique(train_data['DATE'].values)
-#    ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
-#    
-#    for date in date_list:
-#        for ass in ass_list:
-#            print date +" "+ass
-#            temp = (train_data['DATE']==date) & (train_data['ASS_ASSIGNMENT']==ass)
-#            if not train_data[temp].empty:
-#                first_index = train_data[temp].index.values[0]
-#                train_data['CSPL_RECEIVED_CALLS'][first_index] = train_data['CSPL_RECEIVED_CALLS'][temp].sum()
-#                
-#                temp[first_index] = False
-#                train_data = train_data[~temp]
-#    
-#    
-#    elapsed_time = time.time() - start_time
-#    print elapsed_time
+#%%
 
     groups = train_data.groupby(['DATE','WEEK_END','TPER_HOUR','ASS_ASSIGNMENT','LUNDI',
     'MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE','JOUR','NUIT']).sum().reset_index()
         
-
-#%%        
-
-    
-        
-        
-        
-    #%%
-#    partitionner les données selon leur ass_assignment
+#%%
+#  partitionner les données selon leur ass_assignment
     ass_list = np.unique(train_data['ASS_ASSIGNMENT'].values)
     data = {}
     labels = {}
@@ -126,7 +98,7 @@ def preprocess(train_data,meteo) :
         labels[ass] = groups['CSPL_RECEIVED_CALLS'].loc[groups['ASS_ASSIGNMENT']==ass]
     
     
-    #%%
+#%%
     
     
 #    train_data.drop('CSPL_RECEIVED_CALLS', axis=1,inplace=True)
