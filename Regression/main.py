@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import datetime
 from preprocessing import preprocess
 import os
 
@@ -18,13 +19,15 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+submission = pd.read_csv('submission.txt',sep='\t',parse_dates=[0])
+
 #Load Data
-#train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';')
-train_data = pd.read_csv('train_data_short.csv',header=0, sep=';')
+#train_data = pd.read_csv('train_2011_2012.csv',header=0, sep=';',parse_dates=[0])
+train_data = pd.read_csv('train_data_short.csv',header=0, sep=';',parse_dates=[1])
 #meteo2011 = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
 #meteo2012 = pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'])
-meteo = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa']).append(
-pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa']))
+meteo = pd.read_csv('meteo_2011.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'], parse_dates=[0]).append(
+pd.read_csv('meteo_2012.csv', sep=',',names=['date', 'dept_nb','city','temp_min','temp_max','wind_dir','precip','pressure_hPa'],parse_dates=[0]))
 print train_data.head()
 
 #%%
@@ -48,11 +51,11 @@ for ass in data:
     #Regressors[ass] = GaussianNB()
     #Regressors[ass] = LogisticRegression()    
     Regressors[ass] = RandomForestRegressor()
+    #Regressors[ass] = GradientBoostingRegressor()
 
     # essayer de voir l'influence des paramètres
     # tester plusieurs valeurs
         
-    #Regressors[ass] = GradientBoostingRegressor()
     Regressors[ass].fit(data_train,labels_train)
 
 
@@ -61,6 +64,14 @@ for ass in data:
 # Evaluation
 #==============================================================================
 #
+
+
+
+
+
+
+
+
 #print "EVALUATION"
 #
 #read = open('submission.txt', 'r')

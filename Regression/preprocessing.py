@@ -10,7 +10,16 @@ Created on Tue Feb 23 14:28:26 2016
 
 import pandas as pd
 import numpy as np
+import datetime
 import time
+
+
+def processDate(data):
+    
+
+    return 0
+
+
 
 def preprocess(train_data,meteo) :
     droplist =[]
@@ -97,6 +106,11 @@ def preprocess(train_data,meteo) :
 
     groups = train_data.groupby(['DATE','WEEK_END','TPER_HOUR','ASS_ASSIGNMENT','LUNDI',
     'MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE','JOUR','NUIT']).sum().reset_index()
+    
+#%%
+#Concaténer météo et groups
+    
+    
         
 #%%
 #  partitionner les données selon leur ass_assignment
