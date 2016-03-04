@@ -59,18 +59,28 @@ def preprocess(train_data,meteo) :
         
 #%%
 #   traitement de météo
-        
+    
+    def addSemiHours(date) :
+        return date.split(':')[0]+":30"
+    
     def formatDate(date) :
         return date+":00.000"
         
     meteo = meteo[meteo['city']=='Paris-Montsouris']
     meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
+    
+    meteo_temp = meteo.copy(deep=True)
+    meteo_temp['date'] = meteo['date'].map(addSemiHours)
+    
+    meteo = meteo.append(meteo_temp)
+    meteo.sort(['date'], inplace = True)    
+    del meteo_temp    
+    
     meteo['date'] = meteo['date'].map(formatDate)
     for column in ['temp_min','temp_max','precip','pressure_hPa']:
         meteo[column].fillna(np.mean(meteo[column]))
-        
-        
-        
+    
+    
 #%%
 #   Enlever les ass_assignment non traités     
         
