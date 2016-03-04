@@ -2,13 +2,6 @@ import pandas as pd
 import numpy as np
 from preprocessing import preprocess
 import os
-
-from sklearn import cross_validation
-from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-
 os.chdir('..')
 #==============================================================================
 # Algo avec régression
@@ -40,7 +33,6 @@ num_features = len(train_data.columns.values)
 #==============================================================================
 # Learning Algorithm
 #==============================================================================
-
 
 
 
