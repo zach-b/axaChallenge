@@ -14,30 +14,49 @@ import datetime
 import time
 
 
-def processDate(data):
+
+
+def getmonth(date) :
+    return date.month
+    
+def getday(date) : 
+    return date.day
+    
+def getweekday(date) : 
+    return date.dayofweek
+    
+def getweekend(date) : 
+    return (getweekday(date) >= 5)
+    
+def gettime(date) :
+    return(date.hour+date.minute/60.0)
+
+def getnight(date) : 
+    time = gettime(date)
+    return (time >= 23.5 or time <= 7)
+    
+def processDate(data, date_index):
+    data['month'] = data[date_index].map(getmonth)
+    data['day'] = data[date_index].map(getday)
+    data['weekday'] = data[date_index].map(getweekday)
+    data['weekend'] = data[date_index].map(getweekend)
+    data['time'] = data[date_index].map(gettime)    
+    data['night'] = data[date_index].map(getnight)
+    data.drop(date_index, axis=1, inplace=True)
+    
     
 
-    return 0
+
 
 
 
 def preprocess(train_data,meteo) :
     droplist =[]
     
-    
-
-    train_data['LUNDI']=(train_data['DAY_WE_DS']=='Lundi')*1
-    train_data['MARDI']=(train_data['DAY_WE_DS']=='Mardi')*1
-    train_data['MERCREDI']=(train_data['DAY_WE_DS']=='Mercredi')*1
-    train_data['JEUDI']=(train_data['DAY_WE_DS']=='Jeudi')*1
-    train_data['VENDREDI']=(train_data['DAY_WE_DS']=='Vendredi')*1
-    train_data['SAMEDI']=(train_data['DAY_WE_DS']=='Samedi')*1
-    train_data['DIMANCHE']=(train_data['DAY_WE_DS']=='Dimanche')*1
     train_data.drop('DAY_WE_DS', axis=1,inplace=True)
-    
-    train_data['JOUR']= (train_data['TPER_TEAM']=='Jours')*1
-    train_data['NUIT']= (train_data['TPER_TEAM']=='Nuit')*1
     train_data.drop('TPER_TEAM', axis=1,inplace=True)
+    train_data.drop('TPER_HOUR', axis=1,inplace=True)
+    train_data.drop('WEEK_END', axis=1,inplace=True)
     
 #    pas de jours feriés ?
     droplist.extend(['DAY_OFF','DAY_DS'])
@@ -45,9 +64,9 @@ def preprocess(train_data,meteo) :
     droplist.extend(['ASS_DIRECTORSHIP','ASS_PARTNER','ASS_POLE','ASS_SOC_MERE'])
     droplist.extend(['ASS_BEGIN','ASS_COMENT','ASS_END'])
     
-    data_time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
+#    data_time = [float(t.split(' ')[1].split(':')[1])/60 for t in train_data['DATE']]
     
-    train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + data_time
+#    train_data['TPER_HOUR'] = train_data['TPER_HOUR'] + data_time
     
     droplist.extend(['SPLIT_COD','CSPL_CALLSOFFERED','CSPL_OUTFLOWCALLS','CSPL_INFLOWCALLS','CSPL_NOANSREDIR','CSPL_ACDCALLS',
     'CSPL_ABNCALLS','CSPL_CONFERENCE','CSPL_TRANSFERED','CSPL_RINGCALLS','CSPL_DISCCALLS','CSPL_HOLDCALLS',
@@ -66,28 +85,30 @@ def preprocess(train_data,meteo) :
     if 'Unnamed: 0' in train_data.columns.values:
         train_data.drop('Unnamed: 0', axis=1,inplace=True)
         
+    processDate(train_data,'DATE')
+        
 #%%
 #   traitement de météo
     
-    def addSemiHours(date) :
-        return date.split(':')[0]+":30"
-    
-    def formatDate(date) :
-        return date+":00.000"
-        
-    meteo = meteo[meteo['city']=='Paris-Montsouris']
-    meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
-    
-    meteo_temp = meteo.copy(deep=True)
-    meteo_temp['date'] = meteo['date'].map(addSemiHours)
-    
-    meteo = meteo.append(meteo_temp)
-    meteo.sort(['date'], inplace = True)    
-    del meteo_temp    
-    
-    meteo['date'] = meteo['date'].map(formatDate)
-    for column in ['temp_min','temp_max','precip','pressure_hPa']:
-        meteo[column].fillna(np.mean(meteo[column]), inplace = True)
+#    def addSemiHours(date) :
+#        return date.split(':')[0]+":30"
+#    
+#    def formatDate(date) :
+#        return date+":00.000"
+#        
+#    meteo = meteo[meteo['city']=='Paris-Montsouris']
+#    meteo.drop(['dept_nb','city','wind_dir'], axis=1,inplace=True)
+#    
+#    meteo_temp = meteo.copy(deep=True)
+##    meteo_temp['date'] = meteo['date'].map(addSemiHours)
+#    
+#    meteo = meteo.append(meteo_temp)
+#    meteo.sort(['date'], inplace = True)    
+#    del meteo_temp    
+#    
+#    meteo['date'] = meteo['date'].map(formatDate)
+#    for column in ['temp_min','temp_max','precip','pressure_hPa']:
+#        meteo[column].fillna(np.mean(meteo[column]), inplace = True)
     
     
 #%%
@@ -104,8 +125,7 @@ def preprocess(train_data,meteo) :
         
 #%%
 
-    groups = train_data.groupby(['DATE','WEEK_END','TPER_HOUR','ASS_ASSIGNMENT','LUNDI',
-    'MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE','JOUR','NUIT']).sum().reset_index()
+    groups = train_data.groupby(['month','day','weekday','weekend','time','night','ASS_ASSIGNMENT']).sum().reset_index()
     
 #%%
 #Concaténer météo et groups
@@ -120,7 +140,7 @@ def preprocess(train_data,meteo) :
     for ass in ass_list :
         data[ass] = groups.loc[groups['ASS_ASSIGNMENT']==ass]
         labels[ass] = groups['CSPL_RECEIVED_CALLS'].loc[groups['ASS_ASSIGNMENT']==ass]
-        data[ass].drop('ASS_ASSIGNMENT', axis=1, inplace = True)
+        data[ass].drop(['ASS_ASSIGNMENT','CSPL_RECEIVED_CALLS'], axis=1, inplace = True)
     
     
 #%%
